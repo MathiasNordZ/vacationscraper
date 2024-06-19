@@ -1,15 +1,18 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.service import Service
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import csv
+import pandas as pd
 
 service = Service(executable_path=r'C:\\Users\\mathi\AppData\\Local\\Microsoft\\WindowsApps\\geckodriver.exe')
 
 driver = webdriver.Firefox(service=service)
+
 driver.get('https://www.tui.no/?agent=googleads&utm_medium=paidsearch&utm_source=google&gad_source=1&gclid=CjwKCAjwmrqzBhAoEiwAXVpgokAlDZUigmS1D0NXjjTSKBlQJhof3RKWUpNRsWq9WhLI1iZTU8J6KxoCWzsQAvD_BwE&gclsrc=aw.ds')
+driver.maximize_window()
 
 def Search():
     accept_cookie = driver.find_element(By.ID, 'cmCloseBanner')
@@ -78,5 +81,23 @@ def Search():
 
     search = driver.find_element(By.XPATH, '/html/body/main/div/div[1]/div/tui-choice-search-panel/div/div/div/div/div[2]/div[1]/div/div/div[6]/button')
     search.click()
+
+    count = 0
+    while (count < 4):
+        count = count + 1
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+        time.sleep(2)
+
+    driver.execute_script("window.scrollTo(0, 0)")
+
+    price = driver.find_elements(By.CLASS_NAME, 'ResultListItemV2__value')
+    templist = []
+    for p in price:
+        Table_dict = {'Price': p.text}
+        templist.append(Table_dict)
+        df = pd.DataFrame(templist)
+        
+    df.to_csv('table.csv')
+    driver.close()
     
 Search()
